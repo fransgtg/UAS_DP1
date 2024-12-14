@@ -1,0 +1,232 @@
+program SistemPemesananTiketBus;
+uses crt;
+
+type
+    Pengguna = record
+        namapengguna: string;
+        kataSandi: string;
+    end;
+
+    Bus = record
+        namaBus: string;
+        rute: array[1..2] of record
+            namaRute: string;
+            jarak: integer;
+            harga: longint;
+        end;
+        tiketTersedia: integer;
+    end;
+
+var
+    daftarPengguna: array[1..10] of Pengguna;
+    totalPengguna: integer = 0;
+    penggunaSaatIni: Pengguna;
+    busDipilih: Bus;
+    ruteYangDipilih: integer;
+    jumlahTiketDibeli: integer;
+
+{ Prosedur untuk registrasi pengguna baru }
+procedure registrasiPengguna;
+begin
+    clrscr;
+    writeln('Registrasi Pengguna Baru');
+    inc(totalPengguna);
+
+    write('Masukkan nama pengguna: ');
+    readln(daftarPengguna[totalPengguna].namapengguna);
+    write('Masukkan kata sandi: ');
+    readln(daftarPengguna[totalPengguna].kataSandi);
+
+    writeln('Pendaftaran berhasil!');
+    writeln('Nama pengguna Anda: ', daftarPengguna[totalPengguna].namapengguna);
+    writeln('Tekan sembarang tombol untuk melanjutkan...');
+    readkey;
+end;
+
+{ Fungsi untuk validasi login }
+function validasiMasuk(namapengguna, kataSandi: string): boolean;
+var
+    i: integer;
+begin
+    validasiMasuk := false;
+    for i := 1 to totalPengguna do
+    begin
+        if (daftarPengguna[i].namapengguna = namapengguna) and 
+           (daftarPengguna[i].kataSandi = kataSandi) then
+        begin
+            penggunaSaatIni := daftarPengguna[i];
+            validasiMasuk := true;
+            exit;
+        end;
+    end;
+end;
+
+{ Prosedur untuk menginisialisasi data bus }
+procedure inisialisasiBus(var daftarBus: array of Bus);
+begin
+    { Data Bus Simpati Moon }
+    daftarBus[0].namaBus := 'Simpati Moon';
+    daftarBus[0].rute[1].namaRute := 'Medan - Sembahe';
+    daftarBus[0].rute[1].jarak := 10;
+    daftarBus[0].rute[1].harga := 10000;
+    daftarBus[0].rute[2].namaRute := 'Medan - Berastagi';
+    daftarBus[0].rute[2].jarak := 15;
+    daftarBus[0].rute[2].harga := 15000;
+    daftarBus[0].tiketTersedia := 20;
+
+    { Data Bus Padang Bulan Jaya }
+    daftarBus[1].namaBus := 'Padang Bulan Jaya';
+    daftarBus[1].rute[1].namaRute := 'Medan - Kabanjahe';
+    daftarBus[1].rute[1].jarak := 20;
+    daftarBus[1].rute[1].harga := 20000;
+    daftarBus[1].rute[2].namaRute := 'Medan - Samosir';
+    daftarBus[1].rute[2].jarak := 30;
+    daftarBus[1].rute[2].harga := 30000;
+    daftarBus[1].tiketTersedia := 20;
+end;
+
+{ Prosedur menampilkan rute bus }
+procedure tampilkanRute(var bus: Bus);
+begin
+    clrscr;
+    writeln('Rute untuk ', bus.namaBus, ':');
+    writeln('1. ', bus.rute[1].namaRute, ' (', bus.rute[1].jarak, ' KM) - Rp', bus.rute[1].harga);
+    writeln('2. ', bus.rute[2].namaRute, ' (', bus.rute[2].jarak, ' KM) - Rp', bus.rute[2].harga);
+end;
+
+{ Prosedur pembelian tiket }
+procedure beliTiket(var bus: Bus; indeksRute: integer);
+var
+    totalHarga: longint;
+begin
+    clrscr;
+    writeln('Pembelian Tiket ', bus.namaBus, ' - ', bus.rute[indeksRute].namaRute);
+    writeln('Tiket tersedia: ', bus.tiketTersedia);
+
+    write('Berapa tiket yang ingin dibeli? '); readln(jumlahTiketDibeli);
+
+    if (jumlahTiketDibeli > 0) and (jumlahTiketDibeli <= bus.tiketTersedia) then
+    begin
+        totalHarga := jumlahTiketDibeli * bus.rute[indeksRute].harga;
+        bus.tiketTersedia -= jumlahTiketDibeli;
+
+        writeln('Total harga: Rp', totalHarga);
+        writeln('Pembelian berhasil!');
+        writeln('Sisa tiket: ', bus.tiketTersedia);
+    end
+    else
+    begin
+        writeln('Jumlah tiket tidak valid atau tiket tidak mencukupi.');
+    end;
+
+    writeln('Tekan sembarang tombol untuk melanjutkan...');
+    readkey;
+end;
+
+{ Prosedur menu utama 2 }
+procedure menuUtama2;
+var
+    daftarBus: array[0..1] of Bus;
+    pilihan: char;
+begin
+    inisialisasiBus(daftarBus);
+
+    repeat
+        clrscr;
+        writeln('==== Sistem Pemesanan Tiket Bus ====');
+        writeln('1. Simpati Moon');
+        writeln('2. Padang Bulan Jaya');
+        writeln('0. Keluar');
+        write('Pilih bus (0-2): '); readln(pilihan);
+
+        case pilihan of
+            '1': begin
+                tampilkanRute(daftarBus[0]);
+                write('Pilih rute (1-2): '); readln(ruteYangDipilih);
+                if (ruteYangDipilih >= 1) and (ruteYangDipilih <= 2) then
+                    beliTiket(daftarBus[0], ruteYangDipilih);
+            end;
+            '2': begin
+                tampilkanRute(daftarBus[1]);
+                write('Pilih rute (1-2): '); readln(ruteYangDipilih);
+                if (ruteYangDipilih >= 1) and (ruteYangDipilih <= 2) then
+                    beliTiket(daftarBus[1], ruteYangDipilih);
+            end;
+            '0': writeln('Keluar dari sistem...');
+        else
+            writeln('Pilihan tidak valid. Coba lagi.');
+        end;
+
+        if pilihan <> '0' then
+        begin
+            write('Tekan sembarang tombol untuk kembali...');
+            readkey;
+        end;
+    until pilihan = '0';
+end;
+
+{ Prosedur menu login }
+procedure menuMasuk;
+var
+    percobaan: integer;
+    namapengguna, kataSandi: string;
+begin
+    percobaan := 0;
+
+    while (percobaan < 3) do
+    begin
+        clrscr;
+        writeln('Login - Percobaan ', percobaan + 1, ' dari 3');
+        write('Nama Pengguna: '); readln(namapengguna);
+        write('Kata Sandi: '); readln(kataSandi);
+
+        if validasiMasuk(namapengguna, kataSandi) then
+        begin
+            writeln('Login berhasil! Selamat datang, ', penggunaSaatIni.namapengguna, '!');
+            delay(1000);
+            menuUtama2;
+        end
+        else
+        begin
+            writeln('Kredensial tidak valid. Silakan coba lagi.');
+            inc(percobaan);
+            delay(1000);
+        end;
+    end;
+
+    writeln('Terlalu banyak percobaan gagal. Keluar...');
+    halt;
+end;
+
+{ Prosedur menu utama 1 }
+procedure menuUtama1;
+var
+    pilihan: char;
+begin
+    repeat
+        clrscr;
+        writeln('==== Selamat Datang di Ticket Bus ====');
+        writeln('1. Login');
+        writeln('2. Registrasi');
+        writeln('0. Keluar');
+        write('Pilih menu (0-2): '); readln(pilihan);
+
+        case pilihan of
+            '1': menuMasuk;
+            '2': registrasiPengguna;
+            '0': writeln('Keluar dari sistem...');
+        else
+            writeln('Pilihan tidak valid. Silakan coba lagi.');
+        end;
+
+        if pilihan <> '0' then
+        begin
+            write('Tekan sembarang tombol untuk kembali ke menu utama...');
+            readkey;
+        end;
+    until pilihan = '0';
+end;
+
+begin
+    menuUtama1;
+end.
